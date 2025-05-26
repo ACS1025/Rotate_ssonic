@@ -7,33 +7,107 @@
     * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      overflow: hidden;
     }
     iframe {
       width: 100vw;
       height: 100vh;
       border: none;
     }
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 10px 20px;
+      border-radius: 10px;
+      z-index: 9999;
+    }
+    .controls button {
+      padding: 8px 12px;
+      background-color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .controls button:hover {
+      background-color: #ddd;
+    }
   </style>
 </head>
 <body>
-  <iframe id="dashboard" src="https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9"></iframe>
+  <iframe id="dashboard" title="Dashboard Power BI Rotativo"></iframe>
+
+  <div class="controls">
+    <button id="prev">Anterior</button>
+    <button id="toggle">Pausar</button>
+    <button id="next">Próximo</button>
+  </div>
 
   <script>
     const dashboards = [
       "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
       "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=a2ad643d8e09e23a4c26",
       "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=99fce3bd706ffc471fb9",
-      "https://app.powerbi.com/view?r=eyJrIjoiY2RiYTZmYjItYjY2OC00ZTJhLTgzMzktMDgwNjc5ZTEyMzMyIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9"
+      "https://app.powerbi.com/view?r=eyJrIjoiY2RiYTZmYjItYjY2OC00ZTJhLTgzMzktMDgwNjc5ZTEyMzMyIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
+      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=0db772db8adce2047530"
     ];
 
     let index = 0;
-    const tempoRotacao = 59000; // 
-    
-    setInterval(() => {
+    let intervalo = null;
+    const tempoRotacao = 30000; // 30 segundos
+
+    const iframe = document.getElementById('dashboard');
+    const toggleBtn = document.getElementById('toggle');
+
+    function carregarDashboard() {
+      iframe.src = dashboards[index];
+    }
+
+    function iniciarRotacao() {
+      intervalo = setInterval(() => {
+        index = (index + 1) % dashboards.length;
+        carregarDashboard();
+      }, tempoRotacao);
+      toggleBtn.textContent = 'Pausar';
+    }
+
+    function pausarRotacao() {
+      clearInterval(intervalo);
+      intervalo = null;
+      toggleBtn.textContent = 'Retomar';
+    }
+
+    document.getElementById('next').addEventListener('click', () => {
       index = (index + 1) % dashboards.length;
-      document.getElementById('dashboard').src = dashboards[index];
-    }, tempoRotacao);
+      carregarDashboard();
+    });
+
+    document.getElementById('prev').addEventListener('click', () => {
+      index = (index - 1 + dashboards.length) % dashboards.length;
+      carregarDashboard();
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      if (intervalo) {
+        pausarRotacao();
+      } else {
+        iniciarRotacao();
+      }
+    });
+
+    // Inicialização
+    window.onload = () => {
+      carregarDashboard();
+      iniciarRotacao();
+    };
   </script>
 </body>
 </html>
-
