@@ -11,11 +11,13 @@
     }
     body {
       overflow: hidden;
-    }
-    iframe {
-      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       height: 100vh;
-      border: none;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
     }
     .controls {
       position: fixed;
@@ -40,10 +42,15 @@
     .controls button:hover {
       background-color: #ddd;
     }
+    .info {
+      margin-bottom: 80px;
+      font-size: 18px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
-  <iframe id="dashboard" title="Dashboard Power BI Rotativo"></iframe>
+  <div class="info" id="info">Redirecionando para dashboard...</div>
 
   <div class="controls">
     <button id="prev">Anterior</button>
@@ -62,40 +69,39 @@
 
     let index = 0;
     let intervalo = null;
-    const tempoRotacao = 31000; // 30 segundos
+    const tempoRotacao = 31000; // 31 segundos
+    const info = document.getElementById("info");
 
-    const iframe = document.getElementById('dashboard');
-    const toggleBtn = document.getElementById('toggle');
-
-    function carregarDashboard() {
-      iframe.src = dashboards[index];
+    function redirecionar() {
+      info.textContent = `Abrindo dashboard ${index + 1} de ${dashboards.length}...`;
+      window.location.href = dashboards[index];
     }
 
     function iniciarRotacao() {
       intervalo = setInterval(() => {
         index = (index + 1) % dashboards.length;
-        carregarDashboard();
+        redirecionar();
       }, tempoRotacao);
-      toggleBtn.textContent = 'Pausar';
+      document.getElementById('toggle').textContent = 'Pausar';
     }
 
     function pausarRotacao() {
       clearInterval(intervalo);
       intervalo = null;
-      toggleBtn.textContent = 'Retomar';
+      document.getElementById('toggle').textContent = 'Retomar';
     }
 
     document.getElementById('next').addEventListener('click', () => {
       index = (index + 1) % dashboards.length;
-      carregarDashboard();
+      redirecionar();
     });
 
     document.getElementById('prev').addEventListener('click', () => {
       index = (index - 1 + dashboards.length) % dashboards.length;
-      carregarDashboard();
+      redirecionar();
     });
 
-    toggleBtn.addEventListener('click', () => {
+    document.getElementById('toggle').addEventListener('click', () => {
       if (intervalo) {
         pausarRotacao();
       } else {
@@ -103,9 +109,9 @@
       }
     });
 
-    // Inicialização
+    // Iniciar ao carregar
     window.onload = () => {
-      carregarDashboard();
+      redirecionar();
       iniciarRotacao();
     };
   </script>
