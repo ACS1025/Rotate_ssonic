@@ -4,54 +4,42 @@
   <meta charset="UTF-8">
   <title>Dashboards Rotativos</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background-color: #f0f0f0;
       font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
     }
     .controls {
       position: fixed;
       bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
       gap: 10px;
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 10px 20px;
-      border-radius: 10px;
-      z-index: 9999;
     }
     .controls button {
-      padding: 8px 12px;
-      background-color: #ffffff;
+      padding: 10px 15px;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
+      background: #007bff;
+      color: white;
       font-weight: bold;
+      cursor: pointer;
     }
     .controls button:hover {
-      background-color: #ddd;
+      background: #0056b3;
     }
     .info {
-      margin-bottom: 80px;
       font-size: 18px;
+      margin-bottom: 80px;
       color: #333;
     }
   </style>
 </head>
 <body>
-  <div class="info" id="info">Redirecionando para dashboard...</div>
-
+  <div class="info" id="info">Abrindo dashboards rotativos em nova aba...</div>
   <div class="controls">
     <button id="prev">Anterior</button>
     <button id="toggle">Pausar</button>
@@ -69,18 +57,20 @@
 
     let index = 0;
     let intervalo = null;
-    const tempoRotacao = 31000; // 31 segundos
+    const tempoRotacao = 31000;
     const info = document.getElementById("info");
 
-    function redirecionar() {
-      info.textContent = `Abrindo dashboard ${index + 1} de ${dashboards.length}...`;
-      window.location.href = dashboards[index];
+    function abrirDashboard() {
+      const url = dashboards[index];
+      info.textContent = `Abrindo dashboard ${index + 1} de ${dashboards.length}`;
+      window.open(url, '_blank');
     }
 
     function iniciarRotacao() {
+      abrirDashboard();
       intervalo = setInterval(() => {
         index = (index + 1) % dashboards.length;
-        redirecionar();
+        abrirDashboard();
       }, tempoRotacao);
       document.getElementById('toggle').textContent = 'Pausar';
     }
@@ -93,12 +83,12 @@
 
     document.getElementById('next').addEventListener('click', () => {
       index = (index + 1) % dashboards.length;
-      redirecionar();
+      abrirDashboard();
     });
 
     document.getElementById('prev').addEventListener('click', () => {
       index = (index - 1 + dashboards.length) % dashboards.length;
-      redirecionar();
+      abrirDashboard();
     });
 
     document.getElementById('toggle').addEventListener('click', () => {
@@ -109,11 +99,10 @@
       }
     });
 
-    // Iniciar ao carregar
     window.onload = () => {
-      redirecionar();
       iniciarRotacao();
     };
   </script>
 </body>
 </html>
+
