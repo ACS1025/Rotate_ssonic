@@ -4,15 +4,31 @@
   <meta charset="UTF-8">
   <title>Dashboards Rotativos</title>
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
     }
     iframe {
       width: 100vw;
       height: 100vh;
       border: none;
+      transition: opacity 1s ease-in-out;
+      opacity: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
     .controls {
       position: fixed;
@@ -21,11 +37,14 @@
       transform: translateX(-50%);
       display: flex;
       gap: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 10px 20px;
+      border-radius: 10px;
       z-index: 9999;
     }
     .controls button {
       padding: 8px 12px;
-      background-color: white;
+      background-color: #ffffff;
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -37,8 +56,7 @@
   </style>
 </head>
 <body>
-
-  <iframe id="dashboardFrame" src=""></iframe>
+  <iframe id="dashboard" title="Dashboard Power BI Rotativo"></iframe>
 
   <div class="controls">
     <button id="prev">Anterior</button>
@@ -57,38 +75,46 @@
 
     let index = 0;
     let intervalo = null;
-    const tempoRotacao = 31000;
-    const frame = document.getElementById("dashboardFrame");
+    const tempoRotacao = 31000; // 31 segundos
+    const iframe = document.getElementById("dashboard");
+    const toggleBtn = document.getElementById("toggle");
 
     function carregarDashboard() {
-      frame.src = dashboards[index];
+      iframe.style.opacity = 0;
+      setTimeout(() => {
+        iframe.src = dashboards[index];
+      }, 500);
     }
+
+    iframe.onload = () => {
+      iframe.style.opacity = 1;
+    };
 
     function iniciarRotacao() {
       intervalo = setInterval(() => {
         index = (index + 1) % dashboards.length;
         carregarDashboard();
       }, tempoRotacao);
-      document.getElementById("toggle").textContent = "Pausar";
+      toggleBtn.textContent = 'Pausar';
     }
 
     function pausarRotacao() {
       clearInterval(intervalo);
       intervalo = null;
-      document.getElementById("toggle").textContent = "Retomar";
+      toggleBtn.textContent = 'Retomar';
     }
 
-    document.getElementById("next").addEventListener("click", () => {
+    document.getElementById('next').addEventListener('click', () => {
       index = (index + 1) % dashboards.length;
       carregarDashboard();
     });
 
-    document.getElementById("prev").addEventListener("click", () => {
+    document.getElementById('prev').addEventListener('click', () => {
       index = (index - 1 + dashboards.length) % dashboards.length;
       carregarDashboard();
     });
 
-    document.getElementById("toggle").addEventListener("click", () => {
+    toggleBtn.addEventListener('click', () => {
       if (intervalo) {
         pausarRotacao();
       } else {
@@ -96,12 +122,29 @@
       }
     });
 
-    // Inicialização
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        index = (index + 1) % dashboards.length;
+        carregarDashboard();
+      } else if (e.key === 'ArrowLeft') {
+        index = (index - 1 + dashboards.length) % dashboards.length;
+        carregarDashboard();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        toggleBtn.click();
+      }
+    });
+
+    function entrarTelaCheia() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen();
+    }
+
     window.onload = () => {
       carregarDashboard();
       iniciarRotacao();
+      entrarTelaCheia();
     };
   </script>
-
 </body>
 </html>
