@@ -5,41 +5,41 @@
   <title>Dashboards Rotativos</title>
   <style>
     body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
+    }
+    iframe {
+      width: 100vw;
+      height: 100vh;
+      border: none;
     }
     .controls {
       position: fixed;
       bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       gap: 10px;
+      z-index: 9999;
     }
     .controls button {
-      padding: 10px 15px;
+      padding: 8px 12px;
+      background-color: white;
       border: none;
       border-radius: 5px;
-      background: #007bff;
-      color: white;
-      font-weight: bold;
       cursor: pointer;
+      font-weight: bold;
     }
     .controls button:hover {
-      background: #0056b3;
-    }
-    .info {
-      font-size: 18px;
-      margin-bottom: 80px;
-      color: #333;
+      background-color: #ddd;
     }
   </style>
 </head>
 <body>
-  <div class="info" id="info">Abrindo dashboards rotativos em nova aba...</div>
+
+  <iframe id="dashboardFrame" src=""></iframe>
+
   <div class="controls">
     <button id="prev">Anterior</button>
     <button id="toggle">Pausar</button>
@@ -58,40 +58,37 @@
     let index = 0;
     let intervalo = null;
     const tempoRotacao = 31000;
-    const info = document.getElementById("info");
+    const frame = document.getElementById("dashboardFrame");
 
-    function abrirDashboard() {
-      const url = dashboards[index];
-      info.textContent = `Abrindo dashboard ${index + 1} de ${dashboards.length}`;
-      window.open(url, '_blank');
+    function carregarDashboard() {
+      frame.src = dashboards[index];
     }
 
     function iniciarRotacao() {
-      abrirDashboard();
       intervalo = setInterval(() => {
         index = (index + 1) % dashboards.length;
-        abrirDashboard();
+        carregarDashboard();
       }, tempoRotacao);
-      document.getElementById('toggle').textContent = 'Pausar';
+      document.getElementById("toggle").textContent = "Pausar";
     }
 
     function pausarRotacao() {
       clearInterval(intervalo);
       intervalo = null;
-      document.getElementById('toggle').textContent = 'Retomar';
+      document.getElementById("toggle").textContent = "Retomar";
     }
 
-    document.getElementById('next').addEventListener('click', () => {
+    document.getElementById("next").addEventListener("click", () => {
       index = (index + 1) % dashboards.length;
-      abrirDashboard();
+      carregarDashboard();
     });
 
-    document.getElementById('prev').addEventListener('click', () => {
+    document.getElementById("prev").addEventListener("click", () => {
       index = (index - 1 + dashboards.length) % dashboards.length;
-      abrirDashboard();
+      carregarDashboard();
     });
 
-    document.getElementById('toggle').addEventListener('click', () => {
+    document.getElementById("toggle").addEventListener("click", () => {
       if (intervalo) {
         pausarRotacao();
       } else {
@@ -99,10 +96,12 @@
       }
     });
 
+    // Inicialização
     window.onload = () => {
+      carregarDashboard();
       iniciarRotacao();
     };
   </script>
+
 </body>
 </html>
-
