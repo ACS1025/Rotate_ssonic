@@ -11,11 +11,24 @@
     }
     body {
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
     }
     iframe {
       width: 100vw;
       height: 100vh;
       border: none;
+      transition: opacity 1s ease-in-out;
+      opacity: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
     .controls {
       position: fixed;
@@ -53,23 +66,30 @@
 
   <script>
     const dashboards = [
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=a2ad643d8e09e23a4c26",
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=99fce3bd706ffc471fb9",
-      "https://app.powerbi.com/view?r=eyJrIjoiY2RiYTZmYjItYjY2OC00ZTJhLTgzMzktMDgwNjc5ZTEyMzMyIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=0db772db8adce2047530"
-    ];
+  "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
+  "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=a2ad643d8e09e23a4c26",
+  "https://app.powerbi.com/view?r=eyJrIjoiZTA3MTk0ZTQtZGJkOC00MDZiLTliZTMtY2UwNDQyMTRlYTllIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
+  "https://app.powerbi.com/view?r=eyJrIjoiZTA3MTk0ZTQtZGJkOC00MDZiLTliZTMtY2UwNDQyMTRlYTllIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=b8fb6be04344040115a7",
+  "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=0db772db8adce2047530"
+];
+
 
     let index = 0;
     let intervalo = null;
-    const tempoRotacao = 30000; // 30 segundos
-
-    const iframe = document.getElementById('dashboard');
-    const toggleBtn = document.getElementById('toggle');
+    const tempoRotacao = 31000; // 31 segundos
+    const iframe = document.getElementById("dashboard");
+    const toggleBtn = document.getElementById("toggle");
 
     function carregarDashboard() {
-      iframe.src = dashboards[index];
+      iframe.style.opacity = 0;
+      setTimeout(() => {
+        iframe.src = dashboards[index];
+      }, 500);
     }
+
+    iframe.onload = () => {
+      iframe.style.opacity = 1;
+    };
 
     function iniciarRotacao() {
       intervalo = setInterval(() => {
@@ -103,10 +123,28 @@
       }
     });
 
-    // Inicialização
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        index = (index + 1) % dashboards.length;
+        carregarDashboard();
+      } else if (e.key === 'ArrowLeft') {
+        index = (index - 1 + dashboards.length) % dashboards.length;
+        carregarDashboard();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        toggleBtn.click();
+      }
+    });
+
+    function entrarTelaCheia() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen();
+    }
+
     window.onload = () => {
       carregarDashboard();
       iniciarRotacao();
+      entrarTelaCheia();
     };
   </script>
 </body>
