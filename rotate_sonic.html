@@ -1,113 +1,448 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Dashboards Rotativos</title>
+
   <style>
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
+    html,
     body {
+      width: 100%;
+      height: 100%;
       overflow: hidden;
+      background: #0F172A;
     }
-    iframe {
+
+
+    /* =========================================================
+       CONTAINER DO POWER BI
+       ========================================================= */
+
+    #pbi-container {
+      position: fixed;
+      inset: 0;
+
       width: 100vw;
       height: 100vh;
-      border: none;
+
+      overflow: hidden;
+
+      background: #0F172A;
     }
+
+
+    /* =========================================================
+       IFRAME
+       ========================================================= */
+
+    #dashboard {
+      position: absolute;
+
+      display: block;
+
+      border: none;
+
+      margin: 0;
+      padding: 0;
+    }
+
+
+    /* =========================================================
+       CONTROLES
+       ========================================================= */
+
     .controls {
       position: fixed;
+
       bottom: 20px;
       left: 50%;
+
       transform: translateX(-50%);
+
       display: flex;
       gap: 10px;
-      background-color: rgba(0, 0, 0, 0.6);
+
+      background: rgba(0, 0, 0, 0.65);
+
       padding: 10px 20px;
+
       border-radius: 10px;
+
       z-index: 9999;
     }
+
+
     .controls button {
       padding: 8px 12px;
-      background-color: #ffffff;
+
+      background: #FFFFFF;
+
       border: none;
+
       border-radius: 5px;
+
       cursor: pointer;
+
       font-weight: bold;
     }
-    .controls button:hover {
-      background-color: #ddd;
-    }
-  </style>
-</head>
-<body>
-  <iframe id="dashboard" title="Dashboard Power BI Rotativo"></iframe>
 
-  <div class="controls">
-    <button id="prev">Anterior</button>
-    <button id="toggle">Pausar</button>
-    <button id="next">Próximo</button>
+
+    .controls button:hover {
+      background: #DDDDDD;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <!-- =========================================================
+       POWER BI
+       ========================================================= -->
+
+  <div id="pbi-container">
+
+    <iframe
+      id="dashboard"
+      title="Dashboard Power BI Rotativo"
+      allowfullscreen>
+    </iframe>
+
   </div>
 
+
+  <!-- =========================================================
+       CONTROLES
+       ========================================================= -->
+
+  <div class="controls">
+
+    <button id="prev">
+      Anterior
+    </button>
+
+    <button id="toggle">
+      Pausar
+    </button>
+
+    <button id="next">
+      Próximo
+    </button>
+
+  </div>
+
+
   <script>
+
+    // =========================================================
+    // CONFIGURAÇÃO DO RELATÓRIO
+    // =========================================================
+
+    /*
+     * Proporção real utilizada pelo relatório.
+     *
+     * Largura: 4950
+     * Altura:  2560
+     */
+
+    const reportRatio = 4950 / 2560;
+
+
+    /*
+     * Altura da barra inferior do Power BI
+     * que ficará fora da área visível.
+     */
+
+    const toolbarPx = 42;
+
+
+    /*
+     * Tempo de rotação:
+     * 30 segundos
+     */
+
+    const tempoRotacao = 30000;
+
+
+    // =========================================================
+    // DASHBOARDS
+    // =========================================================
+
     const dashboards = [
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=a2ad643d8e09e23a4c26",
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=99fce3bd706ffc471fb9",
-      "https://app.powerbi.com/view?r=eyJrIjoiY2RiYTZmYjItYjY2OC00ZTJhLTgzMzktMDgwNjc5ZTEyMzMyIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9",
-      "https://app.powerbi.com/view?r=eyJrIjoiYzAwNzBhM2EtOTBkYS00ZDI2LTg5NjItOTg5Yzc1Njc4ZjA3IiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=0db772db8adce2047530"
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=48c698a65e212de67104",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=fcfcde9890db02230d0c",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=ReportSection",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=285471afd6829c337b52",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=42842f55a51c70b87702",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=b7afb4feb3313b600752",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=d28807a4491c0b941159",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=76097b8fb8e233e4de9d",
+
+      "https://app.powerbi.com/view?r=eyJrIjoiOGY3NWYwNTAtYmJmNy00MWQ2LWEwYTEtZWIzNzljYmRkMWVhIiwidCI6IjRmMjQ2YWRiLTcwMDYtNGE4Yi04YTdiLWQyYjQzNWE2NWFhYSJ9&pageName=fa5627140d39776a0da1"
+
     ];
 
-    let index = 0;
-    let intervalo = null;
-    const tempoRotacao = 30000; // 30 segundos
 
-    const iframe = document.getElementById('dashboard');
-    const toggleBtn = document.getElementById('toggle');
+    // =========================================================
+    // VARIÁVEIS
+    // =========================================================
+
+    let index = 0;
+
+    let intervalo = null;
+
+    const iframe = document.getElementById("dashboard");
+
+    const toggleBtn = document.getElementById("toggle");
+
+
+    // =========================================================
+    // AJUSTA O FRAME
+    // =========================================================
+
+    function resizePBI() {
+
+      const vw = window.innerWidth;
+
+      const vh = window.innerHeight;
+
+
+      let w;
+      let h;
+
+
+      /*
+       * Se a tela for mais larga que o relatório,
+       * usamos a altura como referência.
+       */
+
+      if (vw / vh > reportRatio) {
+
+        h = vh;
+
+        w = vh * reportRatio;
+
+      }
+
+      /*
+       * Se a tela for mais estreita,
+       * usamos a largura como referência.
+       */
+
+      else {
+
+        w = vw;
+
+        h = vw / reportRatio;
+
+      }
+
+
+      /*
+       * Dimensões do iframe
+       */
+
+      iframe.style.width = w + "px";
+
+      iframe.style.height = (h + toolbarPx) + "px";
+
+
+      /*
+       * Centralização horizontal
+       */
+
+      iframe.style.left =
+        ((vw - w) / 2) + "px";
+
+
+      /*
+       * Centralização vertical
+       */
+
+      iframe.style.top =
+        ((vh - h) / 2) + "px";
+
+    }
+
+
+    // =========================================================
+    // CARREGA DASHBOARD
+    // =========================================================
 
     function carregarDashboard() {
+
       iframe.src = dashboards[index];
+
     }
+
+
+    // =========================================================
+    // PRÓXIMO
+    // =========================================================
+
+    function proximoDashboard() {
+
+      index = (index + 1) % dashboards.length;
+
+      carregarDashboard();
+
+    }
+
+
+    // =========================================================
+    // ANTERIOR
+    // =========================================================
+
+    function dashboardAnterior() {
+
+      index =
+        (index - 1 + dashboards.length)
+        % dashboards.length;
+
+      carregarDashboard();
+
+    }
+
+
+    // =========================================================
+    // INICIAR ROTAÇÃO
+    // =========================================================
 
     function iniciarRotacao() {
-      intervalo = setInterval(() => {
-        index = (index + 1) % dashboards.length;
-        carregarDashboard();
-      }, tempoRotacao);
-      toggleBtn.textContent = 'Pausar';
+
+      /*
+       * Evita criar dois intervalos simultâneos.
+       */
+
+      if (intervalo) {
+        return;
+      }
+
+
+      intervalo = setInterval(
+        proximoDashboard,
+        tempoRotacao
+      );
+
+
+      toggleBtn.textContent = "Pausar";
+
     }
+
+
+    // =========================================================
+    // PAUSAR ROTAÇÃO
+    // =========================================================
 
     function pausarRotacao() {
+
       clearInterval(intervalo);
+
       intervalo = null;
-      toggleBtn.textContent = 'Retomar';
+
+      toggleBtn.textContent = "Retomar";
+
     }
 
-    document.getElementById('next').addEventListener('click', () => {
-      index = (index + 1) % dashboards.length;
-      carregarDashboard();
-    });
 
-    document.getElementById('prev').addEventListener('click', () => {
-      index = (index - 1 + dashboards.length) % dashboards.length;
-      carregarDashboard();
-    });
+    // =========================================================
+    // BOTÃO PRÓXIMO
+    // =========================================================
 
-    toggleBtn.addEventListener('click', () => {
-      if (intervalo) {
-        pausarRotacao();
-      } else {
-        iniciarRotacao();
+    document
+      .getElementById("next")
+      .addEventListener(
+        "click",
+        proximoDashboard
+      );
+
+
+    // =========================================================
+    // BOTÃO ANTERIOR
+    // =========================================================
+
+    document
+      .getElementById("prev")
+      .addEventListener(
+        "click",
+        dashboardAnterior
+      );
+
+
+    // =========================================================
+    // BOTÃO PAUSAR / RETOMAR
+    // =========================================================
+
+    toggleBtn.addEventListener(
+      "click",
+      function () {
+
+        if (intervalo) {
+
+          pausarRotacao();
+
+        }
+
+        else {
+
+          iniciarRotacao();
+
+        }
+
       }
-    });
+    );
 
-    // Inicialização
-    window.onload = () => {
-      carregarDashboard();
-      iniciarRotacao();
-    };
+
+    // =========================================================
+    // RESPONSIVO
+    // =========================================================
+
+    window.addEventListener(
+      "resize",
+      resizePBI
+    );
+
+
+    // =========================================================
+    // INICIALIZAÇÃO
+    // =========================================================
+
+    window.addEventListener(
+      "load",
+      function () {
+
+        resizePBI();
+
+        carregarDashboard();
+
+        iniciarRotacao();
+
+      }
+    );
+
   </script>
+
 </body>
+
 </html>
